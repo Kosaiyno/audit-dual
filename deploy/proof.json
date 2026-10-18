@@ -14,12 +14,16 @@
     "contract_1_registry": {
       "name": "ProjectDisclosureRegistry",
       "file": "contracts/project_disclosure_registry.py",
-      "address": "PENDING_DEPLOYMENT"
+      "address": "0xBC6d84D6398dae57b1f5070E59a3487607E27e9B",
+      "explorer_url": "https://explorer-studio.genlayer.com/address/0xBC6d84D6398dae57b1f5070E59a3487607E27e9B",
+      "deploy_tx": "0xd1fb7563062ff8b399403d59b7b2200b6a1d4b6ecd59d7195b41351754f7d461"
     },
     "contract_2_arbiter": {
       "name": "BytecodeAuditArbiter",
       "file": "contracts/bytecode_audit_arbiter.py",
-      "address": "PENDING_DEPLOYMENT"
+      "address": "0x34366d699922a0862e55381C0b7c3879d2b9effB",
+      "explorer_url": "https://explorer-studio.genlayer.com/address/0x34366d699922a0862e55381C0b7c3879d2b9effB",
+      "deploy_tx": "0x0c0ddd6540c65569d83204320a71bcb3d9cfd60cce43b594b516d3148e071941"
     }
   },
   "evidence_sources": {
@@ -27,5 +31,108 @@
     "honest_token": "https://raw.githubusercontent.com/Kosaiyno/audit-dual/main/evidence/honest_token.sol",
     "deceptive_honeypot": "https://raw.githubusercontent.com/Kosaiyno/audit-dual/main/evidence/deceptive_honeypot.sol"
   },
-  "transactions": []
+  "transactions": [
+    {
+      "step": 1,
+      "contract": "ProjectDisclosureRegistry",
+      "method": "deploy",
+      "description": "Deploy ProjectDisclosureRegistry on StudioNet",
+      "tx_hash": "0xd1fb7563062ff8b399403d59b7b2200b6a1d4b6ecd59d7195b41351754f7d461",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0xd1fb7563062ff8b399403d59b7b2200b6a1d4b6ecd59d7195b41351754f7d461"
+    },
+    {
+      "step": 2,
+      "contract": "BytecodeAuditArbiter",
+      "method": "deploy",
+      "description": "Deploy BytecodeAuditArbiter on StudioNet",
+      "tx_hash": "0x0c0ddd6540c65569d83204320a71bcb3d9cfd60cce43b594b516d3148e071941",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0x0c0ddd6540c65569d83204320a71bcb3d9cfd60cce43b594b516d3148e071941"
+    },
+    {
+      "step": 3,
+      "contract": "ProjectDisclosureRegistry",
+      "method": "set_authorized_arbiter",
+      "description": "Bind authorized BytecodeAuditArbiter contract address to Contract 1",
+      "tx_hash": "0x4fe477c5f70e7401ed7d81ceb94b652efaed474252d494c36bd4933e8aafa202",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0x4fe477c5f70e7401ed7d81ceb94b652efaed474252d494c36bd4933e8aafa202"
+    },
+    {
+      "step": 4,
+      "contract": "ProjectDisclosureRegistry",
+      "method": "register_project",
+      "description": "Register Project 0 (HonestToken) with 1M fixed supply and no mint claim",
+      "tx_hash": "0xe40dff0034fccf1afc36817a10129667e7243dbd1d86ab89ccb7fea902dc151a",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0xe40dff0034fccf1afc36817a10129667e7243dbd1d86ab89ccb7fea902dc151a",
+      "read_back": {
+        "project_id": 0,
+        "name": "HonestToken",
+        "status": "REGISTERED"
+      }
+    },
+    {
+      "step": 5,
+      "contract": "ProjectDisclosureRegistry",
+      "method": "register_project",
+      "description": "Register Project 1 (DeceptiveToken) claiming fixed supply without minting",
+      "tx_hash": "0x9b6bbdda756e95148bb5b0ba79f8c32de9ce1cee87b8873804b83c5557399055",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0x9b6bbdda756e95148bb5b0ba79f8c32de9ce1cee87b8873804b83c5557399055",
+      "read_back": {
+        "project_id": 1,
+        "name": "DeceptiveToken",
+        "status": "REGISTERED"
+      }
+    },
+    {
+      "step": 6,
+      "contract": "BytecodeAuditArbiter",
+      "method": "audit_project",
+      "description": "Contract 2 consumes Contract 1 state, fetches honest_token.sol, and confirms code matches claims; issues emit callback",
+      "tx_hash": "0xe7feae7ac11406cdefeef6daae0c3aead3572f3bf6d34e7edb715be03d401d71",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "verdict": "VERIFIED_ACCURATE",
+      "verbatim_quote": "totalSupply = 1_000_000 * 10**18;",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0xe7feae7ac11406cdefeef6daae0c3aead3572f3bf6d34e7edb715be03d401d71",
+      "cross_contract_callback": {
+        "target_contract": "ProjectDisclosureRegistry",
+        "method": "update_audit_status",
+        "resulting_status": "VERIFIED_CLEAN"
+      }
+    },
+    {
+      "step": 7,
+      "contract": "BytecodeAuditArbiter",
+      "method": "audit_project",
+      "description": "ADVERSARIAL HONEYPOT DEFENSE: Contract 2 consumes Project 1 state, fetches deceptive_honeypot.sol, catches hidden owner mint backdoor, and flips Contract 1 status to FLAGGED_DECEPTIVE",
+      "tx_hash": "0x0bf175f6d0044d26762360f4d2ef9ac8dfde6d60955becf64828a8ddc1a2e921",
+      "status": "FINALIZED",
+      "consensus_state": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "verdict": "DECEPTIVE_DISCLOSURE",
+      "expected_failure_label": "ADVERSARIAL_HONEYPOT_DEFENSE",
+      "verbatim_quote": "function mint(address to, uint256 amount) public onlyOwner returns (bool) {",
+      "explorer_url": "https://explorer-studio.genlayer.com/tx/0x0bf175f6d0044d26762360f4d2ef9ac8dfde6d60955becf64828a8ddc1a2e921",
+      "cross_contract_callback": {
+        "target_contract": "ProjectDisclosureRegistry",
+        "method": "update_audit_status",
+        "resulting_status": "FLAGGED_DECEPTIVE"
+      }
+    }
+  ]
 }
