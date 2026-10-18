@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project": "AuditDual",
+  "track": "Builder -> Intelligent Contracts",
+  "mechanism_shape": "two contracts whose interaction IS the mechanism (one consumes another's finalized state)",
+  "network": {
+    "name": "StudioNet",
+    "chain_id": 61999,
+    "rpc": "https://studio.genlayer.com/api",
+    "explorer": "https://explorer-studio.genlayer.com"
+  },
+  "runner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+  "contracts": {
+    "contract_1_registry": {
+      "name": "ProjectDisclosureRegistry",
+      "file": "contracts/project_disclosure_registry.py",
+      "address": "PENDING_DEPLOYMENT"
+    },
+    "contract_2_arbiter": {
+      "name": "BytecodeAuditArbiter",
+      "file": "contracts/bytecode_audit_arbiter.py",
+      "address": "PENDING_DEPLOYMENT"
+    }
+  },
+  "evidence_sources": {
+    "repository": "https://github.com/Kosaiyno/audit-dual",
+    "honest_token": "https://raw.githubusercontent.com/Kosaiyno/audit-dual/main/evidence/honest_token.sol",
+    "deceptive_honeypot": "https://raw.githubusercontent.com/Kosaiyno/audit-dual/main/evidence/deceptive_honeypot.sol"
+  },
+  "transactions": []
+}
