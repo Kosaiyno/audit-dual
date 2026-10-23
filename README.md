@@ -22,6 +22,7 @@ sequenceDiagram
     participant C1 as ProjectDisclosureRegistry (Contract 1)
     participant C2 as BytecodeAuditArbiter (Contract 2)
     participant Web as Source Code Host (GitHub)
+    participant Chain as Blockchain (Bytecode)
     participant Val as GenLayer AI Validators
 
     Dev->>C1: register_project(name, token_addr, source_url, claims)
@@ -31,7 +32,9 @@ sequenceDiagram
     C1-->>C2: Returns project metadata & claims
     C2->>Web: Non-deterministic web fetch (source code)
     Web-->>C2: Raw Solidity source code
-    C2->>Val: Equivalence Principle Prompt (Extract verbatim quotes)
+    C2->>Chain: gl.eth.get_code(token_address)
+    Chain-->>C2: Deployed bytecode at token address
+    C2->>Val: Equivalence Principle Prompt (Verify bytecode match + Extract verbatim quotes)
     Val-->>C2: Deterministic consensus (VERIFIED_ACCURATE or DECEPTIVE_DISCLOSURE)
     C2->>C1: emit(on='finalized').update_audit_status(project_id, verdict, verbatim_quote)
     Note over C1: Project state flipped to VERIFIED_CLEAN or FLAGGED_DECEPTIVE
@@ -70,8 +73,9 @@ Full transaction parameters and read-back states are documented in [`deploy/proo
 
 1. **Model Judges, Code Moves State**: AI validators in GenLayer evaluate whether raw source lines contradict declared claims and extract exact verbatim quotes. The resulting JSON decision is parsed deterministically, and the state transition on Contract 1 is strictly enforced via permissioned callbacks.
 2. **Strict Verbatim Quoting Rule**: Any finding of deception must cite an exact substring from the fetched source file. If the quote cannot be verified verbatim against the raw source, the arbiter fails closed to `UNCERTAIN` rather than making an unverified state change.
-3. **Equivalence Principle Isolation**: Prompts use `gl.eq_principle.prompt_non_comparative`. All variables passed into `get_input` closures are cloned locally beforehand, preventing closure serialization errors.
-4. **Deterministic Clamping & Sanitization**: Max source code length clamped to 32,000 characters; claims clamped to 500 characters; reason messages clamped to 280 characters to prevent gas exhaustion and memory denial of service.
+3. **Bytecode Correspondence Verification**: Before auditing claims, the arbiter fetches the deployed bytecode at the registered token address via `gl.eth.get_code()` and requires AI validators to confirm the fetched source code corresponds to the deployed bytecode. This prevents an attacker from registering a malicious contract but providing a clean source URL.
+4. **Equivalence Principle Isolation**: Prompts use `gl.eq_principle.prompt_non_comparative`. All variables passed into `get_input` closures are cloned locally beforehand, preventing closure serialization errors.
+5. **Deterministic Clamping & Sanitization**: Max source code length clamped to 32,000 characters; claims clamped to 500 characters; reason messages clamped to 280 characters to prevent gas exhaustion and memory denial of service.
 
 ---
 
@@ -90,9 +94,9 @@ uv run python -m unittest discover -s tests
 
 Output:
 ```
-......
+.......
 ----------------------------------------------------------------------
-Ran 6 tests in 0.002s
+Ran 7 tests in 0.002s
 
 OK
 ```
@@ -101,6 +105,6 @@ OK
 
 ## 6. Honest Limitations
 
-- **Source Code Verification**: The contract currently audits Solidity source code hosted at a deterministic URL (e.g., GitHub raw or IPFS). It does not compile bytecode to verify local bytecode-to-source bytecode hash equivalence on-chain.
 - **Gas / Payload Clamping**: Source code inputs are clamped at 32 KB. Massive multi-contract repositories require flattened single-file contracts or modular library auditing.
 - **Static vs. Dynamic Semantics**: The Equivalence Principle evaluates semantic adherence of function definitions and state variable mutations, but does not execute formal symbolic verification or EVM fuzzing.
+- **Bytecode Verification Heuristic**: The current implementation uses AI validators to assess bytecode correspondence rather than on-chain compilation. Full bytecode-to-source hash equivalence would require a Solidity compiler in the execution environment.

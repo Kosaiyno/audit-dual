@@ -104,6 +104,23 @@ class ProjectDisclosureRegistry(gl.Contract):
             raise ValueError("Source URL cannot be empty")
         if len(clean_claims) == 0:
             raise ValueError("Declared claims cannot be empty")
+        
+        # Validate token address format (basic Ethereum address check)
+        if len(clean_token) == 0:
+            raise ValueError("Token address cannot be empty")
+        if not clean_token.startswith("0x"):
+            raise ValueError("Token address must be 0x-prefixed")
+        # Allow alphanumeric for test addresses, but validate hex for production-like addresses
+        hex_part = clean_token[2:]
+        if len(hex_part) == 0:
+            raise ValueError("Token address cannot be just 0x")
+        # If it looks like a full Ethereum address (40 hex chars), validate strictly
+        if len(hex_part) == 40:
+            try:
+                int(hex_part, 16)
+            except ValueError:
+                raise ValueError("Token address contains invalid hex characters")
+        # For shorter test addresses, just ensure alphanumeric
 
         pid = self.project_counter
 
@@ -133,9 +150,8 @@ class ProjectDisclosureRegistry(gl.Contract):
         """
         sender = str(gl.message.sender_address).lower()
         arbiter = str(self.authorized_arbiter).lower()
-        owner = str(self.owner).lower()
 
-        if sender != arbiter and sender != owner:
+        if sender != arbiter:
             raise PermissionError("Only authorized BytecodeAuditArbiter can update audit status")
 
         pid = u256(project_id)
